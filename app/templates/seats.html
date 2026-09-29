@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Select Seats - {{ show.movie.title }} | CineBook{% endblock %}
+
+{% block content %}
+<div style="max-width: 960px; margin: 0 auto;">
+    <!-- Show Header Summary -->
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 1.2rem 1.8rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.2rem;">{{ show.movie.title }}</h2>
+            <div style="font-size: 0.88rem; color: var(--text-muted);">
+                {{ show.theatre.name }} ({{ show.screen.name }}) • {{ show.show_date }} at <strong style="color: #38bdf8;">{{ show.show_time }}</strong>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <span style="font-size: 0.8rem; color: var(--text-dim); display: block;">Base Ticket Price</span>
+            <strong style="color: #34d399; font-size: 1.2rem;">₹{{ show.base_price }}</strong>
+        </div>
+    </div>
+
+    <!-- Contiguous Seats Finder Bar (DSA Feature) -->
+    <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-md); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <span style="font-size: 1.3rem;">⚡</span>
+            <div>
+                <strong style="color: #38bdf8; font-size: 0.95rem;">DSA Contiguous Seat Recommender</strong>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+                    Uses Sliding Window across 2D Matrix to find adjacent available seats in prime viewing rows
+                </p>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <label for="contiguous-count" style="font-size: 0.85rem; color: var(--text-muted);">Seats:</label>
+            <input type="number" id="contiguous-count" value="2" min="1" max="8" style="width: 55px; padding: 0.3rem 0.5rem; background: var(--bg-secondary); border: 1px solid var(--card-border); color: #fff; border-radius: 4px; text-align: center;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="autoRecommendContiguousSeats({{ show.id }})">
+                Find Contiguous
+            </button>
+        </div>
+    </div>
+    <div id="recommendation-feedback" style="margin-top: -1.2rem; margin-bottom: 1.5rem; font-size: 0.85rem; text-align: center;"></div>
+
+    <div id="booking-error-box" class="alert alert-danger" style="display: none;"></div>
+
+    <!-- Seatmap Container -->
+    <div class="seatmap-container">
+        <!-- Curved Screen indicator -->
+        <div class="screen-indicator-curve">
+            <span class="screen-text">ALL EYES THIS WAY (SCREEN)</span>
+        </div>
+
+        <!-- 2D Seat Matrix -->
+        <div class="seat-grid">
+            {% for row in grid %}
+                {% if row[0] %}
+                <div class="seat-row">
+                    <span class="row-label">{{ row[0].row }}</span>
+                    {% for seat in row %}
+                        {% if seat %}
+                            <div class="seat {{ seat.status|lower }} {{ seat.type|lower }}"
+                                 data-seat-id="{{ seat.seat_id }}"
+                                 data-seat-code="{{ seat.code }}"
+                                 data-price="{{ seat.price }}"
+                                 title="Seat {{ seat.code }} ({{ seat.type }}) - ₹{{ seat.price }}"
+                                 onclick="toggleSeatSelection(this, {{ seat.seat_id }}, '{{ seat.code }}', {{ seat.price }}, '{{ seat.type }}')">
+                                {{ seat.col }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="row-label">{{ row[0].row }}</span>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Legend -->
+        <div class="seat-legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.2);"></div>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: var(--accent-primary);"></div>
+                <span>Selected</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #27272a; border: 1px solid #3f3f46;"></div>
+                <span>Booked</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: var(--bg-tertiary); border-top: 3px solid #fbbf24;"></div>
+                <span>VIP (₹{{ (show.base_price * 1.5)|round(2) }})</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: var(--bg-tertiary); border-top: 3px solid #a855f7;"></div>
+                <span>Premium (₹{{ (show.base_price * 1.25)|round(2) }})</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: var(--bg-tertiary);"></div>
+                <span>Regular (₹{{ show.base_price }})</span>
+            </div>
+        </div>
+
+        <!-- Real-time Selection Dock -->
+        <div class="booking-dock">
+            <div>
+                <div style="font-size: 0.82rem; color: var(--text-dim); text-transform: uppercase;">Selected Seats</div>
+                <div id="selected-seats-list" style="font-size: 1.1rem; font-weight: 700; color: #fff;">None</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+                    Count: <span id="selected-seats-count">0</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div style="text-align: right;">
+                    <span style="font-size: 0.82rem; color: var(--text-dim); display: block;">Total Price</span>
+                    <strong id="total-price-display" style="font-size: 1.3rem; color: #34d399;">₹0.00</strong>
+                </div>
+
+                <button id="proceed-btn" type="button" class="btn btn-primary" onclick="proceedToBooking({{ show.id }})" disabled>
+                    Proceed to Summary →
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/seatmap.js"></script>
+{% endblock %}

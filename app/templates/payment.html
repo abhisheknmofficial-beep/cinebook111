@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Simulation - CineBook{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 2rem auto;">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-lg);">
+        <div style="text-align: center; margin-bottom: 1.8rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1.2rem;">
+            <span style="font-size: 2.2rem; display: block; margin-bottom: 0.3rem;">💳</span>
+            <h1 style="font-size: 1.6rem; font-weight: 800;">Simulated Payment Gateway</h1>
+            <p style="font-size: 0.82rem; color: var(--text-dim); margin-top: 0.2rem;">
+                College Demo Mode • No real money or credentials required
+            </p>
+            <div style="margin-top: 1rem; font-size: 1.5rem; font-weight: 800; color: #34d399;">
+                Amount Due: ₹{{ booking.total_amount }}
+            </div>
+        </div>
+
+        <div id="payment-error-box" class="alert alert-danger" style="display: none;"></div>
+
+        <form id="payment-form" onsubmit="handlePaymentSubmit(event, {{ booking.id }})">
+            <!-- Payment Methods -->
+            <label class="form-label" style="margin-bottom: 0.8rem;">Select Payment Method</label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-bottom: 1.5rem;">
+                <label style="background: var(--bg-secondary); border: 1px solid var(--card-border); padding: 0.8rem; border-radius: var(--radius-md); text-align: center; cursor: pointer;">
+                    <input type="radio" name="payment_method" value="UPI" checked onchange="switchMethod('UPI')">
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 0.3rem;">UPI</div>
+                </label>
+                <label style="background: var(--bg-secondary); border: 1px solid var(--card-border); padding: 0.8rem; border-radius: var(--radius-md); text-align: center; cursor: pointer;">
+                    <input type="radio" name="payment_method" value="CARD" onchange="switchMethod('CARD')">
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 0.3rem;">Debit/Card</div>
+                </label>
+                <label style="background: var(--bg-secondary); border: 1px solid var(--card-border); padding: 0.8rem; border-radius: var(--radius-md); text-align: center; cursor: pointer;">
+                    <input type="radio" name="payment_method" value="NETBANKING" onchange="switchMethod('NETBANKING')">
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 0.3rem;">NetBanking</div>
+                </label>
+            </div>
+
+            <!-- Dynamic Input Panels -->
+            <div id="panel-upi" class="method-panel">
+                <div class="form-group">
+                    <label class="form-label">Virtual Payment Address (UPI ID)</label>
+                    <input type="text" class="form-input" value="student@oksbi" placeholder="user@bank">
+                </div>
+            </div>
+
+            <div id="panel-card" class="method-panel" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Simulated Card Number</label>
+                    <input type="text" class="form-input" value="4532 •••• •••• 8899" readonly>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                    <div class="form-group">
+                        <label class="form-label">Expiry</label>
+                        <input type="text" class="form-input" value="12/28" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVV</label>
+                        <input type="password" class="form-input" value="123" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-netbanking" class="method-panel" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Select Bank</label>
+                    <select class="form-select">
+                        <option>State Bank of India</option>
+                        <option>HDFC Bank</option>
+                        <option>ICICI Bank</option>
+                        <option>Axis Bank</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Viva Test Toggle: Simulate Failure -->
+            <div style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.4); border-radius: var(--radius-md); padding: 0.8rem 1rem; margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; cursor: pointer; color: #f87171;">
+                    <input type="checkbox" id="simulate_failure">
+                    <span><strong>Viva Demonstration:</strong> Simulate Payment Failure (releases held seats)</span>
+                </label>
+            </div>
+
+            <button type="submit" id="pay-button" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+                Pay ₹{{ booking.total_amount }} Now
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function switchMethod(method) {
+        document.querySelectorAll('.method-panel').forEach(p => p.style.display = 'none');
+        if (method === 'UPI') document.getElementById('panel-upi').style.display = 'block';
+        if (method === 'CARD') document.getElementById('panel-card').style.display = 'block';
+        if (method === 'NETBANKING') document.getElementById('panel-netbanking').style.display = 'block';
+    }
+
+    async function handlePaymentSubmit(event, bookingId) {
+        event.preventDefault();
+        const form = event.target;
+        const method = form.payment_method.value;
+        const simulateFailure = document.getElementById('simulate_failure').checked;
+        const btn = document.getElementById('pay-button');
+        const errBox = document.getElementById('payment-error-box');
+
+        errBox.style.display = 'none';
+        btn.disabled = true;
+        btn.innerText = 'Processing simulated payment...';
+
+        try {
+            const res = await fetch('/api/payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    booking_id: bookingId,
+                    payment_method: method,
+                    simulate_failure: simulateFailure
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                errBox.innerText = data.detail || 'Payment failed.';
+                errBox.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = 'Retry Payment';
+                return;
+            }
+
+            if (data.status === 'FAILED') {
+                errBox.innerHTML = `
+                    <strong>Payment Failed (Simulated Test).</strong><br>
+                    Your transaction was intentionally failed. The reserved seats have been automatically released back to the auditorium matrix.
+                `;
+                errBox.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = 'Pay Now';
+                return;
+            }
+
+            // Success -> go to confirmation
+            window.location.href = `/booking-confirmation/${bookingId}`;
+        } catch (e) {
+            errBox.innerText = 'Network error while processing payment.';
+            errBox.style.display = 'block';
+            btn.disabled = false;
+            btn.innerText = 'Pay Now';
+        }
+    }
+</script>
+{% endblock %}

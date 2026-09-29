@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CineBook - Discover. Choose. Experience.{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <span class="brand-icon">🎬</span> CineBook
+            </a>
+
+            <!-- Global Search Bar -->
+            <form action="/movies" method="GET" class="nav-search">
+                <span class="search-icon">🔍</span>
+                <input type="text" name="q" placeholder="Search movies, genre, languages..." value="{{ query|default('') }}">
+            </form>
+
+            <!-- Navigation Links -->
+            <ul class="nav-links">
+                <li><a href="/movies">Movies</a></li>
+                <li><a href="/events">Events</a></li>
+                <li><a href="/theatres">Theatres</a></li>
+                <li><a href="/dsa-explorer"><span class="badge-dsa">DSA Lab</span></a></li>
+
+                {% if user %}
+                    <li><a href="/my-bookings">My Bookings</a></li>
+                    {% if user.role == 'ADMIN' %}
+                        <li><a href="/admin"><span class="badge-admin">Admin</span></a></li>
+                    {% endif %}
+                    <li><a href="/profile">{{ user.name }}</a></li>
+                    <li><a href="/logout" class="btn btn-secondary btn-sm">Logout</a></li>
+                {% else %}
+                    <li><a href="/login" class="btn btn-secondary btn-sm">Login</a></li>
+                    <li><a href="/register" class="btn btn-primary btn-sm">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div>
+                <strong style="color: #fff; font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem;">
+                    <span>🎬</span> CineBook
+                </strong>
+                <p style="font-size: 0.85rem; margin-top: 0.4rem; color: var(--text-dim);">
+                    "Discover. Choose. Experience." — Full-Stack Python & DSA Ticketing Platform
+                </p>
+                <p style="font-size: 0.78rem; margin-top: 0.3rem; color: var(--text-dim);">
+                    Independent educational project inspired by modern booking systems.
+                </p>
+            </div>
+            <div style="display: flex; gap: 2rem;">
+                <div>
+                    <h5 style="color: #fff; margin-bottom: 0.5rem;">Explore</h5>
+                    <ul style="list-style: none; font-size: 0.85rem; line-height: 1.8;">
+                        <li><a href="/movies">All Movies</a></li>
+                        <li><a href="/events">Live Events</a></li>
+                        <li><a href="/theatres">Venues & Theatres</a></li>
+                        <li><a href="/dsa-explorer">DSA Visualization</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 style="color: #fff; margin-bottom: 0.5rem;">Quick Access</h5>
+                    <ul style="list-style: none; font-size: 0.85rem; line-height: 1.8;">
+                        <li><a href="/login">User Login</a></li>
+                        <li><a href="/register">Sign Up</a></li>
+                        <li><a href="/admin">Admin Panel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

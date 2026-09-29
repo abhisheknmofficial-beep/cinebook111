@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - CineBook Events{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; md-flex-row; margin-bottom: 2rem;">
+        <div style="position: relative; max-height: 420px; overflow: hidden; background: #000; display: flex; justify-content: center;">
+            <img src="{{ event.poster_url or '/static/images/placeholder_event.svg' }}" alt="{{ event.title }}" style="width: 100%; object-fit: cover;" onerror="this.src='/static/images/placeholder_event.svg'">
+        </div>
+
+        <div style="padding: 2.5rem;">
+            <div style="display: flex; gap: 0.6rem; margin-bottom: 1rem;">
+                <span class="tag" style="background: rgba(6, 182, 212, 0.2); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.4);">
+                    {{ event.category }}
+                </span>
+                <span class="tag">Date: {{ event.event_date }}</span>
+                <span class="tag">Time: {{ event.event_time }}</span>
+            </div>
+
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.8rem;">{{ event.title }}</h1>
+            <p style="color: var(--text-dim); margin-bottom: 1.5rem; font-size: 1rem;">
+                📍 Venue: <strong>{{ event.location }}</strong>
+            </p>
+
+            <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); margin-bottom: 2rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.8rem;">About the Event</h3>
+                <p style="color: var(--text-muted); line-height: 1.8; font-size: 0.95rem;">{{ event.description }}</p>
+            </div>
+
+            <!-- Booking Section -->
+            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 1.8rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim); text-transform: uppercase;">Price Per Ticket</div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #34d399;">₹{{ event.price }}</div>
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                        Remaining tickets: <strong>{{ event.available_seats }}</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div>
+                        <label for="ticket-count" style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">Quantity:</label>
+                        <select id="ticket-count" class="form-select" style="width: 80px;" onchange="updateEventTotal()">
+                            {% for i in range(1, 11) %}
+                                {% if i <= event.available_seats %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <span style="font-size: 0.82rem; color: var(--text-dim); display: block;">Total: <strong id="event-total-display" style="color: #fff; font-size: 1.1rem;">₹{{ event.price }}</strong></span>
+                        <button type="button" class="btn btn-primary" onclick="bookEventTicket({{ event.id }})" style="margin-top: 0.4rem;">
+                            Book Tickets
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="event-err" class="alert alert-danger" style="display: none; margin-top: 1rem;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const unitPrice = {{ event.price }};
+    function updateEventTotal() {
+        const qty = parseInt(document.getElementById('ticket-count').value, 10);
+        document.getElementById('event-total-display').innerText = '₹' + (qty * unitPrice).toFixed(2);
+    }
+
+    async function bookEventTicket(eventId) {
+        const qty = parseInt(document.getElementById('ticket-count').value, 10);
+        const errBox = document.getElementById('event-err');
+        errBox.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_id: eventId,
+                    num_event_tickets: qty
+                })
+            });
+            const data = await res.json();
+            if (res.status === 401) {
+                window.location.href = `/login?next=/events/${eventId}`;
+                return;
+            }
+            if (!res.ok) {
+                errBox.innerText = data.detail || 'Booking failed.';
+                errBox.style.display = 'block';
+                return;
+            }
+            window.location.href = `/booking/${data.booking_id}`;
+        } catch (e) {
+            errBox.innerText = 'Network error while booking.';
+            errBox.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

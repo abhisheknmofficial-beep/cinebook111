@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ movie.title }} - Tickets & Showtimes | CineBook{% endblock %}
+
+{% block content %}
+<!-- Movie Banner Backdrop -->
+<div class="movie-banner" style="background-image: url('{{ movie.backdrop_url or movie.poster_url or '/static/images/placeholder_movie.svg' }}');">
+    <div class="movie-banner-overlay">
+        <img src="{{ movie.poster_url or '/static/images/placeholder_movie.svg' }}" alt="{{ movie.title }}" class="banner-poster" onerror="this.src='/static/images/placeholder_movie.svg'">
+        <div class="banner-details">
+            <h1 class="banner-title">{{ movie.title }}</h1>
+            <div class="banner-tags">
+                <span class="tag" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4);">
+                    ★ {{ movie.rating }}/10
+                </span>
+                <span class="tag">{{ movie.language }}</span>
+                <span class="tag">{{ movie.genre }}</span>
+                <span class="tag">{{ movie.duration_mins }} Minutes</span>
+                <span class="tag">Released: {{ movie.release_date }}</span>
+            </div>
+            <p class="banner-synopsis">{{ movie.description }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Showtimes & Theatres Booking Section -->
+<div class="section-header" style="margin-top: 2rem;">
+    <div>
+        <h2 class="section-title"><span>🏛️</span> Available Theatres & Showtimes</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Select a preferred showtime to pick your seats</p>
+    </div>
+
+    <!-- City Filter -->
+    <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <label for="city-filter" style="font-size: 0.85rem; color: var(--text-muted);">City:</label>
+        <select id="city-filter" class="form-select" style="width: auto; padding: 0.35rem 0.8rem;" onchange="location = this.value;">
+            <option value="/movies/{{ movie.id }}">All Cities</option>
+            {% for c in cities %}
+            <option value="/movies/{{ movie.id }}?city={{ c }}" {% if selected_city == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+{% if theatre_shows|length == 0 %}
+<div style="background: var(--card-bg); border-radius: var(--radius-md); padding: 3rem; text-align: center; border: 1px dashed var(--card-border);">
+    <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🎭</span>
+    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem;">No scheduled shows currently available</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+        There are no active shows for this movie in {{ selected_city or 'the selected region' }}. Please check back later or explore other cities.
+    </p>
+</div>
+{% else %}
+    {% for ts in theatre_shows %}
+    <div class="theatre-card">
+        <div class="theatre-header">
+            <div>
+                <h3 class="theatre-name">{{ ts.theatre.name }}</h3>
+                <span class="theatre-address">{{ ts.theatre.address }}, {{ ts.theatre.city }}</span>
+            </div>
+            <span class="badge-dsa" style="font-size: 0.75rem;">Instant Reservation</span>
+        </div>
+
+        <div class="showtimes-grid">
+            {% for show in ts.shows %}
+            <a href="/seats/{{ show.id }}" class="showtime-pill">
+                <span>{{ show.show_time }}</span>
+                <span class="pill-price">from ₹{{ show.base_price }}</span>
+                <span style="font-size: 0.68rem; color: #94a3b8; margin-top: 2px;">{{ show.screen.name }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

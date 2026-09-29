@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}CineBook - Discover. Choose. Experience.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero">
+    <h1><span>Discover. Choose. Experience.</span></h1>
+    <p>Book movie tickets, live concerts, standup comedy, and theatre shows with instant seat selection, real-time availability, and zero hassle.</p>
+    <div class="hero-actions">
+        <a href="/movies" class="btn btn-primary">Browse All Movies</a>
+        <a href="/events" class="btn btn-secondary">Explore Live Events</a>
+        <a href="/dsa-explorer" class="btn btn-outline">Explore DSA Architecture ⚡</a>
+    </div>
+</div>
+
+<!-- City Filter Bar -->
+<div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 1rem 1.5rem; margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.8rem;">
+        <span style="font-size: 1.2rem;">📍</span>
+        <label for="city-selector" style="font-weight: 600; font-size: 0.95rem;">Select Your City:</label>
+        <select id="city-selector" class="form-select" style="width: auto; padding: 0.4rem 1rem;">
+            <option value="">All Cities</option>
+            {% for c in cities %}
+                <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--text-dim);">
+        Fast O(1) hash indexed lookups & DSA-powered seat recommendation
+    </div>
+</div>
+
+<!-- Featured Movies Section -->
+<div class="section-header">
+    <h2 class="section-title"><span>🎬</span> Recommended Movies</h2>
+    <a href="/movies" style="color: var(--accent-primary); font-weight: 600; font-size: 0.9rem;">View All →</a>
+</div>
+
+<div class="movies-grid">
+    {% for movie in featured_movies %}
+    <div class="movie-card">
+        <div class="poster-wrap">
+            <img src="{{ movie.poster_url or '/static/images/placeholder_movie.svg' }}" alt="{{ movie.title }}" onerror="this.src='/static/images/placeholder_movie.svg'">
+            <div class="rating-badge">★ {{ movie.rating }}</div>
+        </div>
+        <div class="card-info">
+            <h3 class="card-title" title="{{ movie.title }}">{{ movie.title }}</h3>
+            <div class="card-meta">{{ movie.language }} • {{ movie.genre }}</div>
+            <a href="/movies/{{ movie.id }}" class="btn btn-primary btn-sm card-btn">Book Tickets</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Upcoming Events Section -->
+<div class="section-header">
+    <h2 class="section-title"><span>🎟️</span> Live Events & Experiences</h2>
+    <a href="/events" style="color: var(--cyan-accent); font-weight: 600; font-size: 0.9rem;">View All Events →</a>
+</div>
+
+<div class="events-grid">
+    {% for ev in upcoming_events %}
+    <div class="event-card">
+        <div class="poster-wrap">
+            <img src="{{ ev.poster_url or '/static/images/placeholder_event.svg' }}" alt="{{ ev.title }}" onerror="this.src='/static/images/placeholder_event.svg'">
+            <div class="rating-badge" style="color: #38bdf8;">📍 {{ ev.location.split(',')[0] }}</div>
+        </div>
+        <div class="card-info">
+            <h3 class="card-title" title="{{ ev.title }}">{{ ev.title }}</h3>
+            <div class="card-meta">{{ ev.category }} • {{ ev.event_time }}</div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #34d399; margin-bottom: 0.8rem;">
+                ₹{{ ev.price }}
+            </div>
+            <a href="/events/{{ ev.id }}" class="btn btn-secondary btn-sm card-btn">Book Now</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- DSA Architecture Featurette -->
+<div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-lg); padding: 2.5rem; margin-top: 2rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge-dsa" style="margin-bottom: 0.5rem; display: inline-block;">DSA Core Engine</span>
+            <h3 style="font-size: 1.5rem; font-weight: 800;">Real Data Structures & Algorithms Powering CineBook</h3>
+        </div>
+        <a href="/dsa-explorer" class="btn btn-outline btn-sm">Launch DSA Interactive Visualizer</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem;">
+        <div style="background: var(--bg-primary); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+            <strong style="color: #38bdf8;">1. 2D Seating Matrix</strong>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+                Auditorium grid with Sliding Window algorithm for instant contiguous seat recommendations.
+            </p>
+        </div>
+        <div style="background: var(--bg-primary); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+            <strong style="color: #34d399;">2. Merge & Quick Sort</strong>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+                Stable O(n log n) Merge Sort for release dates/ratings; in-place Quick Sort for ticket pricing.
+            </p>
+        </div>
+        <div style="background: var(--bg-primary); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+            <strong style="color: #fbbf24;">3. Hashing & Separate Chaining</strong>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+                O(1) average lookup for movie fast indexes and seat reservation status maps.
+            </p>
+        </div>
+        <div style="background: var(--bg-primary); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+            <strong style="color: #f43f5e;">4. FIFO Booking Queue</strong>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+                Strict First-Come First-Served queue simulation preventing race conditions during blockbuster sales.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

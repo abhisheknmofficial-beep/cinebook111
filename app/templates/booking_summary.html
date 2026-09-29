@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Summary - CineBook{% endblock %}
+
+{% block content %}
+<div style="max-width: 650px; margin: 2rem auto;">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-lg);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1.2rem;">
+            <div>
+                <span class="badge-dsa" style="margin-bottom: 0.4rem; display: inline-block;">Order Summary</span>
+                <h1 style="font-size: 1.8rem; font-weight: 800;">Review Reservation</h1>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 0.78rem; color: var(--text-dim); display: block;">Booking Ref:</span>
+                <code style="color: #38bdf8; font-weight: 700;">{{ booking.booking_reference }}</code>
+            </div>
+        </div>
+
+        {% if booking.show %}
+        <div style="display: flex; gap: 1.5rem; margin-bottom: 2rem; background: var(--bg-secondary); padding: 1.2rem; border-radius: var(--radius-md);">
+            <img src="{{ booking.show.movie.poster_url or '/static/images/placeholder_movie.svg' }}" alt="{{ booking.show.movie.title }}" style="width: 80px; height: 110px; object-fit: cover; border-radius: 6px;" onerror="this.src='/static/images/placeholder_movie.svg'">
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem;">{{ booking.show.movie.title }}</h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">{{ booking.show.movie.language }} • {{ booking.show.movie.genre }}</span>
+                <span style="font-size: 0.85rem; color: #38bdf8; margin-top: 0.4rem;">
+                    🏛️ {{ booking.show.theatre.name }} ({{ booking.show.screen.name }})
+                </span>
+                <span style="font-size: 0.82rem; color: var(--text-dim);">
+                    📅 {{ booking.show.show_date }} at <strong>{{ booking.show.show_time }}</strong>
+                </span>
+            </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 0.8rem;">
+            Seat Breakdown
+        </h4>
+        <div style="background: var(--bg-primary); border-radius: var(--radius-md); padding: 1rem; border: 1px solid var(--card-border); margin-bottom: 1.5rem;">
+            {% for s in booking.seats %}
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.4rem 0; {% if not loop.last %}border-bottom: 1px dashed var(--card-border);{% endif %}">
+                <span>Seat <strong>{{ s.seat_code }}</strong> ({{ s.seat.seat_type }})</span>
+                <span style="font-weight: 600;">₹{{ s.price }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% elif booking.event %}
+        <div style="background: var(--bg-secondary); padding: 1.2rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+            <h3 style="font-size: 1.2rem; font-weight: 700;">{{ booking.event.title }}</h3>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.3rem;">
+                📍 {{ booking.event.location }} • {{ booking.event.event_date }} at {{ booking.event.event_time }}
+            </div>
+            <div style="margin-top: 0.6rem; font-size: 0.9rem;">
+                Tickets: <strong>{{ booking.num_tickets }}</strong> × ₹{{ booking.event.price }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pricing Total Box -->
+        <div style="border-top: 1px solid var(--card-border); padding-top: 1.2rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                <span>Tickets Subtotal</span>
+                <span>₹{{ booking.total_amount }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.8rem;">
+                <span>Convenience Fee & Taxes</span>
+                <span style="color: #34d399;">₹0.00 (Waived)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 800; border-top: 1px dashed var(--card-border); padding-top: 0.8rem;">
+                <span>Grand Total</span>
+                <span style="color: #34d399;">₹{{ booking.total_amount }}</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <a href="/payment/{{ booking.id }}" class="btn btn-primary" style="flex: 1; padding: 0.85rem; font-size: 1rem;">
+                Proceed to Payment (₹{{ booking.total_amount }}) →
+            </a>
+            <button type="button" class="btn btn-secondary" onclick="cancelBooking({{ booking.id }})">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

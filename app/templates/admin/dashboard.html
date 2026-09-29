@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - CineBook{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <span class="badge-admin" style="margin-bottom: 0.4rem; display: inline-block;">Platform Administration</span>
+        <h1 style="font-size: 2.2rem; font-weight: 800;">Executive Dashboard</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">System overview, platform metrics, and administrative controls</p>
+    </div>
+
+    <!-- Quick Navigation Hub -->
+    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+        <a href="/admin/movies" class="btn btn-secondary btn-sm">🎬 Manage Movies</a>
+        <a href="/admin/events" class="btn btn-secondary btn-sm">🎟️ Manage Events</a>
+        <a href="/admin/theatres" class="btn btn-secondary btn-sm">🏛️ Manage Theatres</a>
+        <a href="/admin/shows" class="btn btn-secondary btn-sm">⏰ Manage Shows</a>
+        <a href="/admin/bookings" class="btn btn-secondary btn-sm">📋 All Bookings</a>
+        <a href="/admin/users" class="btn btn-secondary btn-sm">👥 Users</a>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Total Users</span>
+        <div class="stat-value">{{ stats.total_users }}</div>
+        <span style="font-size: 0.78rem; color: var(--text-dim);">Registered platform accounts</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Total Movies</span>
+        <div class="stat-value">{{ stats.total_movies }}</div>
+        <span style="font-size: 0.78rem; color: var(--text-dim);">In active catalog</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Theatres</span>
+        <div class="stat-value">{{ stats.total_theatres }}</div>
+        <span style="font-size: 0.78rem; color: var(--text-dim);">Across connected cities</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Scheduled Shows</span>
+        <div class="stat-value">{{ stats.total_shows }}</div>
+        <span style="font-size: 0.78rem; color: var(--text-dim);">Active showtimes</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Total Bookings</span>
+        <div class="stat-value">{{ stats.total_bookings }}</div>
+        <span style="font-size: 0.78rem; color: var(--text-dim);">{{ stats.confirmed_bookings }} confirmed</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Total Revenue</span>
+        <div class="stat-value" style="color: #34d399;">₹{{ stats.total_revenue }}</div>
+        <span style="font-size: 0.78rem; color: var(--text-dim);">From confirmed bookings</span>
+    </div>
+</div>
+
+<!-- Recent Bookings Table -->
+<div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 2rem; margin-top: 2rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.2rem;">Recent Platform Bookings</h3>
+    
+    {% if stats.recent_bookings|length == 0 %}
+    <p style="color: var(--text-muted); font-size: 0.9rem;">No recent bookings recorded.</p>
+    {% else %}
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Ref ID</th>
+                    <th>User</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in stats.recent_bookings %}
+                <tr>
+                    <td><code style="color: #38bdf8; font-weight: 700;">{{ b.reference }}</code></td>
+                    <td>{{ b.user_email }}</td>
+                    <td style="font-weight: 700; color: #34d399;">₹{{ b.amount }}</td>
+                    <td>
+                        <span style="font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 9999px; font-weight: 700; 
+                            {% if b.status == 'CONFIRMED' %}background: rgba(16,185,129,0.2); color: #34d399;
+                            {% elif b.status == 'PENDING' %}background: rgba(245,158,11,0.2); color: #fbbf24;
+                            {% else %}background: rgba(239,68,68,0.2); color: #f87171;{% endif %}">
+                            {{ b.status }}
+                        </span>
+                    </td>
+                    <td style="color: var(--text-dim); font-size: 0.85rem;">{{ b.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

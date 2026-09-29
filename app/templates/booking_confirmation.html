@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmed - {{ booking.booking_reference }} | CineBook{% endblock %}
+
+{% block content %}
+<div class="ticket-wrapper">
+    <div class="ticket-header">
+        <div class="ticket-status-badge">✓ BOOKING CONFIRMED</div>
+        <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.3rem;">Ticket Reserved</h1>
+        <p style="font-size: 0.85rem; color: var(--text-dim);">
+            Reference: <strong style="color: #38bdf8;">{{ booking.booking_reference }}</strong>
+        </p>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        {% if booking.show %}
+            <div class="ticket-row">
+                <span class="label">Movie</span>
+                <span class="val">{{ booking.show.movie.title }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="label">Theatre</span>
+                <span class="val">{{ booking.show.theatre.name }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="label">Auditorium / Screen</span>
+                <span class="val">{{ booking.show.screen.name }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="label">Date & Time</span>
+                <span class="val">{{ booking.show.show_date }} at {{ booking.show.show_time }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="label">Seats ({{ booking.seats|length }})</span>
+                <span class="val" style="color: #38bdf8;">
+                    {% for s in booking.seats %}{{ s.seat_code }}{% if not loop.last %}, {% endif %}{% endfor %}
+                </span>
+            </div>
+        {% elif booking.event %}
+            <div class="ticket-row">
+                <span class="label">Event</span>
+                <span class="val">{{ booking.event.title }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="label">Location</span>
+                <span class="val">{{ booking.event.location }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="label">Date & Time</span>
+                <span class="val">{{ booking.event.event_date }} at {{ booking.event.event_time }}</span>
+            </div>
+            <div class="ticket-row">
+                <span class="label">Tickets</span>
+                <span class="val">{{ booking.num_tickets }} Ticket(s)</span>
+            </div>
+        {% endif %}
+
+        <div class="ticket-row" style="border-top: 1px dashed var(--card-border); padding-top: 0.8rem; margin-top: 0.8rem;">
+            <span class="label">Amount Paid</span>
+            <span class="val" style="color: #34d399; font-size: 1.15rem;">₹{{ booking.total_amount }}</span>
+        </div>
+
+        {% if booking.payment %}
+        <div class="ticket-row">
+            <span class="label">Payment Reference</span>
+            <span class="val" style="font-size: 0.8rem; font-family: monospace;">{{ booking.payment.payment_reference }}</span>
+        </div>
+        <div class="ticket-row">
+            <span class="label">Payment Mode</span>
+            <span class="val">{{ booking.payment.payment_method }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <a href="/my-bookings" class="btn btn-primary" style="flex: 1;">
+            View My Bookings
+        </a>
+        <button type="button" class="btn btn-secondary" onclick="window.print()">
+            🖨️ Print Ticket
+        </button>
+    </div>
+</div>
+{% endblock %}

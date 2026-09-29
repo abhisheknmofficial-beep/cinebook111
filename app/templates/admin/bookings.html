@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Bookings - CineBook Admin{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <a href="/admin" style="font-size: 0.85rem; color: var(--accent-primary);">← Back to Dashboard</a>
+        <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.2rem;">All Platform Bookings</h1>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>Booking Ref</th>
+                <th>User</th>
+                <th>Show / Event</th>
+                <th>Seats / Tickets</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Time</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bookings %}
+            <tr>
+                <td><code style="color: #38bdf8; font-weight: 700;">{{ b.booking_reference }}</code></td>
+                <td>{{ b.user.name }}<br><span style="font-size: 0.78rem; color: var(--text-dim);">{{ b.user.email }}</span></td>
+                <td>
+                    {% if b.show %}
+                        <strong>{{ b.show.movie.title }}</strong><br>
+                        <span style="font-size: 0.8rem; color: var(--text-dim);">{{ b.show.theatre.name }}</span>
+                    {% elif b.event %}
+                        <strong>{{ b.event.title }}</strong><br>
+                        <span style="font-size: 0.8rem; color: var(--text-dim);">{{ b.event.location }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if b.show %}
+                        {% for s in b.seats %}{{ s.seat_code }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    {% else %}
+                        {{ b.num_tickets }} Ticket(s)
+                    {% endif %}
+                </td>
+                <td style="color: #34d399; font-weight: 700;">₹{{ b.total_amount }}</td>
+                <td>
+                    <span style="font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 9999px; font-weight: 700;
+                        {% if b.status == 'CONFIRMED' %}background: rgba(16,185,129,0.2); color: #34d399;
+                        {% elif b.status == 'PENDING' %}background: rgba(245,158,11,0.2); color: #fbbf24;
+                        {% else %}background: rgba(239,68,68,0.2); color: #f87171;{% endif %}">
+                        {{ b.status }}
+                    </span>
+                </td>
+                <td style="font-size: 0.82rem; color: var(--text-dim);">{{ b.booking_time|string|truncate(16, True, '') }}</td>
+                <td>
+                    {% if b.status != 'CANCELLED' %}
+                    <button type="button" class="btn btn-danger btn-sm" onclick="cancelBooking({{ b.id }})">
+                        Cancel
+                    </button>
+                    {% else %}
+                    <span style="font-size: 0.8rem; color: var(--text-dim);">Cancelled</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

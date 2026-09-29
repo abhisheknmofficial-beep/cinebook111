@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Theatres - CineBook Admin{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <a href="/admin" style="font-size: 0.85rem; color: var(--accent-primary);">← Back to Dashboard</a>
+        <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.2rem;">Theatres & Screens Management</h1>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="openModal('add-theatre-modal')">
+        + Add New Theatre
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Theatre Name</th>
+                <th>City</th>
+                <th>Address</th>
+                <th>Screens</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in theatres %}
+            <tr>
+                <td>{{ t.id }}</td>
+                <td><strong>{{ t.name }}</strong></td>
+                <td><span style="color: #38bdf8;">{{ t.city }}</span></td>
+                <td>{{ t.address }}</td>
+                <td>{{ t.screens|length }} Screen(s)</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteTheatre({{ t.id }})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Theatre Modal -->
+<div id="add-theatre-modal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.3rem; font-weight: 800;">Add New Theatre</h3>
+            <button type="button" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;" onclick="closeModal('add-theatre-modal')">&times;</button>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.2rem;">
+            Note: Adding a theatre automatically provisions a default Screen (Screen 1) with 40 interactive 2D matrix seats (Rows A-E, Cols 1-8).
+        </p>
+
+        <form onsubmit="handleCreateTheatre(event)">
+            <div class="form-group">
+                <label class="form-label">Theatre Name</label>
+                <input type="text" name="name" class="form-input" placeholder="e.g. PVR Icon Infinity Mall" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">City</label>
+                <input type="text" name="city" class="form-input" placeholder="Mumbai, Bengaluru, Delhi" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Full Address</label>
+                <input type="text" name="address" class="form-input" placeholder="Mall Road, Andheri West" required>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Create Theatre</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('add-theatre-modal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin.js"></script>
+{% endblock %}

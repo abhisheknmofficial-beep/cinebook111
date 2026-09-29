@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Events - CineBook Admin{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <a href="/admin" style="font-size: 0.85rem; color: var(--accent-primary);">← Back to Dashboard</a>
+        <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.2rem;">Live Events Management</h1>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="openModal('add-event-modal')">
+        + Add New Event
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Event Title</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Date & Time</th>
+                <th>Price</th>
+                <th>Seats (Avail/Total)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in events %}
+            <tr>
+                <td>{{ e.id }}</td>
+                <td><strong>{{ e.title }}</strong></td>
+                <td><span class="tag">{{ e.category }}</span></td>
+                <td>{{ e.location }}</td>
+                <td>{{ e.event_date }} at {{ e.event_time }}</td>
+                <td style="color: #34d399; font-weight: 700;">₹{{ e.price }}</td>
+                <td>{{ e.available_seats }} / {{ e.total_seats }}</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteEvent({{ e.id }})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Event Modal -->
+<div id="add-event-modal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.3rem; font-weight: 800;">Add Live Event</h3>
+            <button type="button" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;" onclick="closeModal('add-event-modal')">&times;</button>
+        </div>
+
+        <form onsubmit="handleCreateEvent(event)">
+            <div class="form-group">
+                <label class="form-label">Event Title</label>
+                <input type="text" name="title" class="form-input" placeholder="e.g. Comedy Night Live" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select">
+                        <option>Standup Comedy</option>
+                        <option>Concert</option>
+                        <option>Workshop</option>
+                        <option>Sports Event</option>
+                        <option>Theatre & Play</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location / City</label>
+                    <input type="text" name="location" class="form-input" placeholder="The Comedy Club, Mumbai" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Event Date</label>
+                    <input type="date" name="event_date" class="form-input" value="2026-10-15" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Event Time</label>
+                    <input type="text" name="event_time" class="form-input" value="08:00 PM" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Ticket Price (₹)</label>
+                    <input type="number" step="10" name="price" class="form-input" value="499" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Total Capacity (Seats)</label>
+                    <input type="number" name="total_seats" class="form-input" value="150" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-input" rows="3" placeholder="Enter event details..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Poster URL (Optional)</label>
+                <input type="url" name="poster_url" class="form-input" placeholder="https://example.com/poster.jpg">
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Create Event</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('add-event-modal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin.js"></script>
+{% endblock %}

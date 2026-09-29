@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Shows - CineBook Admin{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <a href="/admin" style="font-size: 0.85rem; color: var(--accent-primary);">← Back to Dashboard</a>
+        <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.2rem;">Scheduled Movie Shows</h1>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="openModal('add-show-modal')">
+        + Schedule New Show
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Movie</th>
+                <th>Theatre & Screen</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Base Price</th>
+                <th>Bookings</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in shows %}
+            <tr>
+                <td>{{ s.id }}</td>
+                <td><strong>{{ s.movie.title }}</strong></td>
+                <td>{{ s.theatre.name }} • <span style="color: var(--text-dim);">{{ s.screen.name }}</span></td>
+                <td>{{ s.show_date }}</td>
+                <td style="color: #38bdf8; font-weight: 700;">{{ s.show_time }}</td>
+                <td style="color: #34d399; font-weight: 700;">₹{{ s.base_price }}</td>
+                <td>{{ s.bookings|length }}</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteShow({{ s.id }})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Schedule Show Modal -->
+<div id="add-show-modal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.3rem; font-weight: 800;">Schedule Movie Show</h3>
+            <button type="button" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;" onclick="closeModal('add-show-modal')">&times;</button>
+        </div>
+
+        <form onsubmit="handleCreateShow(event)">
+            <div class="form-group">
+                <label class="form-label">Select Movie</label>
+                <select name="movie_id" class="form-select" required>
+                    {% for m in movies %}
+                    <option value="{{ m.id }}">{{ m.title }} ({{ m.language }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Select Theatre</label>
+                <select name="theatre_id" id="theatre-select" class="form-select" onchange="updateScreenOptions()" required>
+                    {% for t in theatres %}
+                    <option value="{{ t.id }}">{{ t.name }} - {{ t.city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Select Screen</label>
+                <select name="screen_id" id="screen-select" class="form-select" required>
+                    <!-- Populated dynamically via JS -->
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Show Date</label>
+                    <input type="date" name="show_date" class="form-input" value="2026-09-29" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Show Time</label>
+                    <input type="text" name="show_time" class="form-input" value="07:30 PM" placeholder="e.g. 07:30 PM" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Base Ticket Price (₹)</label>
+                <input type="number" step="10" name="base_price" class="form-input" value="220" required>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Schedule Show</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('add-show-modal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin.js"></script>
+<script>
+    const theatreScreens = {
+        {% for t in theatres %}
+        "{{ t.id }}": [
+            {% for sc in t.screens %}
+            { id: {{ sc.id }}, name: "{{ sc.name }}" },
+            {% endfor %}
+        ],
+        {% endfor %}
+    };
+
+    function updateScreenOptions() {
+        const theatreId = document.getElementById('theatre-select').value;
+        const screenSelect = document.getElementById('screen-select');
+        screenSelect.innerHTML = '';
+        const screens = theatreScreens[theatreId] || [];
+        screens.forEach(sc => {
+            const opt = document.createElement('option');
+            opt.value = sc.id;
+            opt.innerText = sc.name;
+            screenSelect.appendChild(opt);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateScreenOptions();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - CineBook Admin{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <a href="/admin" style="font-size: 0.85rem; color: var(--accent-primary);">← Back to Dashboard</a>
+        <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.2rem;">Registered Users Directory</h1>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Bookings Count</th>
+                <th>Registration Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.id }}</td>
+                <td><strong>{{ u.name }}</strong></td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.phone or '—' }}</td>
+                <td>
+                    {% if u.role == 'ADMIN' %}
+                    <span class="badge-admin">ADMIN</span>
+                    {% else %}
+                    <span class="tag">USER</span>
+                    {% endif %}
+                </td>
+                <td>{{ u.bookings|length }}</td>
+                <td style="color: var(--text-dim); font-size: 0.85rem;">{{ u.created_at|string|truncate(10, True, '') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

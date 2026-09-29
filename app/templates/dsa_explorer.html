@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}DSA Architecture Laboratory - CineBook{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <span class="badge-dsa" style="margin-bottom: 0.4rem; display: inline-block;">College Viva Laboratory</span>
+        <h1 style="font-size: 2.2rem; font-weight: 800;">Data Structures & Algorithms Explorer</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Interactive demonstration of real DSA modules implemented from scratch in <code>app/dsa/</code>
+        </p>
+    </div>
+    <button id="run-benchmark-btn" type="button" class="btn btn-primary" onclick="runDsaBenchmark()">
+        ⚡ Run Live Micro-Benchmark
+    </button>
+</div>
+
+<div id="benchmark-output" style="margin-bottom: 2rem;"></div>
+
+<!-- DSA Modules Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.8rem;">
+    <!-- 1. Searching Module -->
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.8rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #38bdf8;">1. Searching Algorithms</h3>
+            <span class="badge-dsa">search.py</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <strong>Linear Search:</strong> O(n) scan used for multi-field movie query matches.<br>
+            <strong>Binary Search:</strong> O(log n) divide-and-conquer on sorted movie IDs and dates.
+        </p>
+        <div style="background: var(--bg-primary); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-family: monospace; border: 1px solid var(--card-border);">
+            Array: [101, 104, 109, 115, 120, 134, 150]<br>
+            Binary Search for 115:<br>
+            • mid = 115 -> MATCH in 1 iteration! (Best case: O(1))<br>
+            Time Complexity: O(log n) | Space: O(1)
+        </div>
+    </div>
+
+    <!-- 2. Sorting Module -->
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.8rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #34d399;">2. Sorting Algorithms</h3>
+            <span class="badge-dsa">sorting.py</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <strong>Merge Sort:</strong> Stable divide-and-conquer O(n log n). Used for ratings & release dates where equal scores preserve secondary order.<br>
+            <strong>Quick Sort:</strong> In-place partitioning O(n log n). Used for ticket prices.
+        </p>
+        <div style="background: var(--bg-primary); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-family: monospace; border: 1px solid var(--card-border);">
+            Merge Sort: splits -> left half, right half -> merge in O(n)<br>
+            Quick Sort: Lomuto pivot partition -> recursive subarrays<br>
+            Stability: Merge Sort (Stable) | Quick Sort (Unstable)
+        </div>
+    </div>
+
+    <!-- 3. Hashing Module -->
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.8rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">3. Hashing & Separate Chaining</h3>
+            <span class="badge-dsa">hashing.py</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Implements <code>ChainingHashTable</code> with DJB2 polynomial hashing and dynamic bucket array resizing when load factor &gt; 0.75.
+        </p>
+        <div style="background: var(--bg-primary); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-family: monospace; border: 1px solid var(--card-border);">
+            Hash Formula: index = abs(hash(key)) % capacity<br>
+            Collision: Chained linked list at bucket[index]<br>
+            Complexity: Avg O(1) insert/lookup | Space: O(n + cap)
+        </div>
+    </div>
+
+    <!-- 4. 2D Seat Matrix & Sliding Window -->
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.8rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #f43f5e;">4. 2D Seat Matrix & Allocation</h3>
+            <span class="badge-dsa">seat_allocation.py</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Represents auditorium as <code>matrix[R][C]</code> with O(1) coordinate lookups and a Sliding Window algorithm for adjacent seat bookings.
+        </p>
+        <div style="background: var(--bg-primary); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-family: monospace; border: 1px solid var(--card-border);">
+            Window Size = k (requested tickets)<br>
+            Priority: Middle row outward (center-screen cinematic angle)<br>
+            Collision Prevention: Hash Set verification O(k)
+        </div>
+    </div>
+
+    <!-- 5. Graph Ecosystem Relationship -->
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.8rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #a855f7;">5. Relationship Graph</h3>
+            <span class="badge-dsa">graph.py</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Models entertainment domain as a Multi-Tier Directed Graph:<br>
+            <code>Movie ──&gt; Theatre ──&gt; Screen ──&gt; Show ──&gt; Seats</code>
+        </p>
+        <div style="background: var(--bg-primary); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-family: monospace; border: 1px solid var(--card-border);">
+            Traversal Algorithms:<br>
+            • BFS: Layer-by-layer discovery of shows in a city in O(V + E)<br>
+            • DFS: Full lineage path reservation tracing in O(V + E)
+        </div>
+    </div>
+
+    <!-- 6. FIFO Booking Transaction Queue -->
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.8rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #06b6d4;">6. FIFO Booking Queue</h3>
+            <span class="badge-dsa">queue.py</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Buffers concurrent ticket checkout transactions in a First-In, First-Out order to guarantee zero race conditions.
+        </p>
+        <div style="background: var(--bg-primary); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-family: monospace; border: 1px solid var(--card-border);">
+            Enqueue: O(1) rear append<br>
+            Dequeue: O(1) front pop<br>
+            Fairness: FCFS order during flash sales
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin.js"></script>
+{% endblock %}

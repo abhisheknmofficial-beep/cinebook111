@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Live Events, Comedy & Concerts - CineBook{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+        <h1 style="font-size: 2.2rem; font-weight: 800;">Live Events & Concerts</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Standup Comedy, Live Gigs, Tech Workshops & Sports Experiences</p>
+    </div>
+</div>
+
+<!-- Category Filters Bar -->
+<div style="display: flex; gap: 0.8rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
+    <a href="/events" class="tag" style="padding: 0.5rem 1.2rem; font-size: 0.9rem; {% if not selected_cat %}background: var(--accent-primary); color: #fff;{% endif %}">
+        All Categories
+    </a>
+    {% for cat in categories %}
+    <a href="/events?category={{ cat }}" class="tag" style="padding: 0.5rem 1.2rem; font-size: 0.9rem; {% if selected_cat == cat %}background: var(--accent-primary); color: #fff;{% endif %}">
+        {{ cat }}
+    </a>
+    {% endfor %}
+</div>
+
+{% if events|length == 0 %}
+<div style="text-align: center; padding: 4rem 2rem; background: var(--card-bg); border-radius: var(--radius-lg); border: 1px dashed var(--card-border);">
+    <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🎫</span>
+    <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem;">No events found</h3>
+    <p style="color: var(--text-muted); max-width: 450px; margin: 0 auto 1.5rem;">
+        No events match your current filter. Try browsing other categories.
+    </p>
+    <a href="/events" class="btn btn-secondary">View All Events</a>
+</div>
+{% else %}
+<div class="events-grid">
+    {% for ev in events %}
+    <div class="event-card">
+        <div class="poster-wrap">
+            <img src="{{ ev.poster_url or '/static/images/placeholder_event.svg' }}" alt="{{ ev.title }}" onerror="this.src='/static/images/placeholder_event.svg'">
+            <div class="rating-badge" style="color: #38bdf8;">{{ ev.category }}</div>
+        </div>
+        <div class="card-info">
+            <h3 class="card-title" title="{{ ev.title }}">{{ ev.title }}</h3>
+            <div class="card-meta">📍 {{ ev.location }} • {{ ev.event_time }}</div>
+            <p style="font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.8rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                {{ ev.description }}
+            </p>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: auto; margin-bottom: 0.8rem;">
+                <span style="font-size: 1.1rem; font-weight: 800; color: #34d399;">₹{{ ev.price }}</span>
+                <span style="font-size: 0.78rem; color: var(--text-dim);">{{ ev.available_seats }} seats left</span>
+            </div>
+            <a href="/events/{{ ev.id }}" class="btn btn-primary btn-sm card-btn">Book Tickets</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
